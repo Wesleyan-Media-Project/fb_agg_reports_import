@@ -95,7 +95,7 @@ Here is an example of a record with this problem:
 
 <img width="786" alt="Screenshot 2023-06-04 at 10 48 04 PM" src="https://github.com/Wesleyan-Media-Project/fb_agg_reports_import/assets/17502191/3d9eb5ba-0f8b-4879-985b-10e0d33e4373">
 
-Notice how the opening quotation mark is straight, but the closing quotation mark is curly.
+Notice how in the `funding_entity` column, the quotation marks around the nickname Chris are different: the opening quotation mark is straight, but the closing quotation mark is slanted and is actually a Unicode character.
 
 
 The unmatched quotation marks cause failure in the data input: the script misses the end of a field, and this leads to errors or to the loss of blocks of data.
