@@ -105,11 +105,24 @@ This is an output of an R script that displays that field. The curly quotation m
 
 The unmatched quotation marks lead to serious failures with data import: when the script does not find the end of an enclosing quotation mark, it fails to read the fields that follow the problematic field. It then also fails to read several rows of data.
 
-Our way of handling this problem was to write our own import function. It performs CSV import of a single row of data. If the number of columns in the result does not match the expected number of columns, then the script removes all possible offending characters (single and double quotation marks) from the row and performs the import again. This way we have a record, and later on we match it manually to the information that is available via Facebook Ads API.
+Our way of handling this problem was to write our own import function. It is contained in the script `read_fb_file.R`. It performs CSV import of a single row of data. If the number of columns in the result does not match the expected number of columns, then the script removes all double quotation marks from the row and performs the import again. This way we have a record, and later on we can match it manually to the name and disclaimer available via Facebook Ads API.
 
 #### Number cleanup
 
-When the amount of spend on ads is below 100, Facebook does not report the number and instead inserts the string <img width="58" alt="image of a string saying less than or equal to 100" src="https://github.com/Wesleyan-Media-Project/fb_agg_reports_import/assets/17502191/8ec0b73b-f998-4e9d-ba38-c17113d53c17">
+When the amount of spend on ads is below 100, Facebook does not report the number and instead inserts the string 
+<img width="58" alt="image of a string saying less than or equal to 100" src="https://github.com/Wesleyan-Media-Project/fb_agg_reports_import/assets/17502191/8ec0b73b-f998-4e9d-ba38-c17113d53c17">
+
+In order to make this value compatible with the numerical format of the column, we remove the "less than or equal" character and convert the value to a number. Thus, for smaller spends, we store a rounded up value of 100.
+
+As a side note, once an advertiser has exceeded the threshold of 100 USD, their spend is reported with a one-dollar accuracy.
+
+### BigQuery
+
+Part of the reporting done by WMP during elections involves reporting the total spend on Facebook ads. The lifelong report serves this purpose perfectly. Because not everyone on the WMP team is proficient with writing SQL queries, we have come up with a workflow where the data is stored in BigQuery and the end user can explore the data using the BigQuery connector in Google Sheets.
+
+For this reason, the `fb_lifelong_upload.R` script uploads the data to BigQuery after it imports the data into MySQL. We also use the table in BigQuery as a source for the diganostic chart showing the time series of the total number of ads and total spend reported by Facebook. The chart is available as a publicly viewable graphic accessible at this [link](https://docs.google.com/spreadsheets/d/1A9laSAxrBJ2I6osWm6qcUFBmKoZeFN_tcjFEvbnrWFs/edit#gid=0)
+
+![chart](https://github.com/Wesleyan-Media-Project/fb_agg_reports_import/assets/17502191/74af6049-edfb-462b-9ab4-0217212b7593)
 
 
 
