@@ -43,7 +43,7 @@ Here is how the downloading part of the page looks now:
 The `fb_all_reports_download_v060123.py` is a Python/Selenium script that runs on a Linux-based machine and uses Chrome running in the headless mode. There are two heavily technical points worth knowing:
 
 * Enabling the downloads. By default, as a security precuation, browsers running in headless mode will not download files. The downloads need to be enabled explicitly. Our script uses the Chrome API where the `command_executor` module sends a POST request to the browser to enable the downloads and change the destination directory. This is a highly technical and poorly documented feature that, probably, is dependent on the version of the Chrome. For instance, Firefox uses a different set of instructions that are passed through the browser profile file.
-* Triggering the download. The drop-down menu in the downloads section is actually a collection of `div` tags and is not a menu. In the past, the engineering team would change the spelling of the "download report" phrase and there was also a situation that there were actually two "download report" links in the page: one was visible, and the other one was not - it was part of the menu that would open up for users on a mobile platform.
+* Triggering the download. The drop-down menu in the downloads section is actually a collection of `div` tags and is not a menu. In the past, the engineering team would change the spelling of the "download report" phrase and there was also a situation that there were actually two "download report" links in the page: one was visible, and the other one was not - it was part of the menu that would open up for users on a mobile device.
 
 We are providing a version of the script that can run in a Google Colab notebook: `facebook_reports_downloader_firefox.ipynb`. Because the newer versions of Colab made installation of Chrome very difficult, the script uses headless Firefox that is installed when the notebook is initialized.
 
@@ -58,7 +58,7 @@ The downloader is launched every 30 minutes using a crontab job. The script cont
 
 We use the 30 minute intervals as a protection against the situation when the Facebook team posts several reports in a quick succession. This happens occasionally, when the team falls behind the schedule. Normally, the webpage contains reports that lag about two days from the current day. On some occasions (around holidays like the Memorial Day or the Independence Day) the lag increases. The team then posts several reports, sometimes with an interval of one hour or so.
 
-Again, this behavior is rooted in the legacy mode of operations when it was impossible to go back and retrieve the reports from previous days. With the new feature in place, the script can visit the page once per day. If there is a gap in reports, it can be manually filled.
+The 30-minute interval is rooted in the legacy mode of operations when it was impossible to go back and retrieve the reports from previous days. With the new feature in place, the script can visit the page once per day. If there is a gap in reports, it can be manually filled.
 
 ## Data import
 
@@ -75,7 +75,7 @@ Scripts that import a table with the `region` column:
 
 ### Data cleanup
 
-The script perform some data cleanup. Specifically, there was one transient and one persistent problem with the data furnished by Facebook.
+The scripts perform some data cleanup. Specifically, there was one transient and one persistent problem with the data furnished by Facebook.
 
 #### Transient problem: 
 The CSV files would contain a non-ASCII sequence of characters at the beginning of a line every 500 rows. This sequence is shown below:
@@ -89,21 +89,21 @@ Because the page name is the first column in the file, presence of this sequence
 
 This problem is caused not by something in the Facebook system, but by the user input. As the reader probably knows, many text editors will automatically replace the regular straight quotation marks with the "curly" quotation marks. This is done for aesthetic reasons. 
 
-Some of the entries in the report contain mismatched quotation marks which, most likely, arise in the following scenario: A user enclosed something into quotation marks, for instance, the nickname of a candidate, e.g. `Rob "Chip" Robbie`. The user was typing this in a text editor. The editor has converted one quotation symbol into the curly mark, but the other one stayed as the "straight" quotation marks. Facebook preserves user input and inserts it into the reports. CSV is a format that uses commas to separate fields in a record. If a text string inside a field contains a comma, then this field is enclosed into (is surrounded by) quotation marks. If the text already had quotation marks and they are unmatched (meaning there is an opening mark but it is not matched with aclosing mark), then the data parsing function will get confused and will incorrectly identify the boundary between fields.
+Some of the entries in the report contain mismatched quotation marks which, most likely, arise in the following scenario: A user enclosed something into quotation marks, for instance, the nickname of a candidate, e.g. `Rob "Chip" Robbie`. The user was typing this in a text editor. The editor has converted one quotation symbol into the curly mark, but the other one stayed as the "straight" quotation marks. Facebook preserves user input and inserts it into the reports. CSV is a format that uses commas to separate fields in a record. If a text string inside a field contains a comma, then this field is enclosed into (is surrounded by) quotation marks. If the text already had quotation marks and they are unmatched (meaning there is an opening mark but it is not matched with a closing mark), then the data parsing function will incorrectly identify the boundary between fields.
 
-From our experience, the problem of mismatched quotation marks occurs more often among small advertisers. They tend to pick disclaimer strings with more textual florishes (i.e., monickers in quotation marks). Here is an example of a record with this problem:
+From our experience, the problem of mismatched quotation marks occurs more often among small advertisers. They tend to pick disclaimer strings with more textual flourishes (i.e., monickers in quotation marks). Here is an example of a record with this problem:
 
 <img width="786" alt="Screenshot 2023-06-04 at 10 48 04 PM" src="https://github.com/Wesleyan-Media-Project/fb_agg_reports_import/assets/17502191/3d9eb5ba-0f8b-4879-985b-10e0d33e4373">
 
 
 Notice how in the `funding_entity` column, the quotation marks around the nickname Chris are different: the opening quotation mark is straight, but the closing quotation mark is slanted and is actually a Unicode character.
 
-This is an output of an R script that displays that field. The curly quotation mark on the right is more visible:
+Below is an output of an R script that displays that field. The curly quotation mark on the right is more visible:
 
 <img width="355" alt="Screenshot of an output of R code that shows the text string" src="https://github.com/Wesleyan-Media-Project/fb_agg_reports_import/assets/17502191/b6852588-7dd4-413f-aa8b-2e99b0fea567">
 
 
-The unmatched quotation marks lead to serious failures with data import: when the script does not find the end of an enclosing quotation mark, it fails to read the fields that follow the problematic field. It then also fails to read several rows of data.
+The unmatched quotation marks lead to serious failures with data import: when the script does not find the end of an enclosing quotation mark, it fails to read the fields that follow the problematic field. It then also fails to read several rows of data - they are ingested as if they were part of one data row.
 
 Our way of handling this problem was to write our own import function. It is contained in the script `read_fb_file.R`. It performs CSV import of a single row of data. If the number of columns in the result does not match the expected number of columns, then the script removes all double quotation marks from the row and performs the import again. This way we have a record, and later on we can match it manually to the name and disclaimer available via Facebook Ads API.
 
