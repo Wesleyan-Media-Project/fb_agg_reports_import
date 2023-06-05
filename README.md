@@ -116,7 +116,7 @@ When the amount of spend on ads is below 100, Facebook does not report the numbe
 
 In order to make this value compatible with the numerical format of the column, we remove the "less than or equal" character and convert the value to a number. Thus, for smaller spends, we store a rounded up value of 100.
 
-As a side note, once an advertiser has exceeded the threshold of 100 USD, their spend is reported with a one-dollar accuracy.
+As a side note, once an advertiser has exceeded the threshold of 100 USD, Facebook reports their spend with a one-dollar accuracy.
 
 ### BigQuery
 
