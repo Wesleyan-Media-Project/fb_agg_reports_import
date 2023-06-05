@@ -60,3 +60,26 @@ We use the 30 minute intervals as a protection against the situation when the Fa
 
 Again, this behavior is rooted in the legacy mode of operations when it was impossible to go back and retrieve the reports from previous days. With the new feature in place, the script can visit the page once per day. If there is a gap in reports, it can be manually filled.
 
+## Data import
+
+A set of scripts scans the directories listed above and, if there are new files, imports them into the MySQL database. These scripts fall into two groups: with and without region data.
+
+Scripts that do not handle region data:
+* `fb_lifelong_upload.R`, and
+* `fb_daily_import2.R`
+
+Scripts that import a table with the `region` column:
+* `fb_weekly_regions_import.R`,
+* `fb_30days_regions_import.R`, and 
+* `fb_90days_regions_import.R`
+
+### Data cleanup
+
+The script perform some data cleanup. Specifically, there was one transient and one persistent problem with the data furnished by Facebook.
+
+Transient problem: 
+>   p = "\xef\xbb\xbf"
+    tmp_text = gsub(p, "\n", tmp_text)
+    tmp_text = gsub("^\n", "", tmp_text)
+    
+ 
