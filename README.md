@@ -95,14 +95,20 @@ From our experience, the problem of mismatched quotation marks occurs more often
 
 <img width="786" alt="Screenshot 2023-06-04 at 10 48 04 PM" src="https://github.com/Wesleyan-Media-Project/fb_agg_reports_import/assets/17502191/3d9eb5ba-0f8b-4879-985b-10e0d33e4373">
 
+
 Notice how in the `funding_entity` column, the quotation marks around the nickname Chris are different: the opening quotation mark is straight, but the closing quotation mark is slanted and is actually a Unicode character.
 
 This is an output of an R script that displays that field. The curly quotation mark on the right is more visible:
 
 <img width="355" alt="Screenshot 2023-06-04 at 10 55 32 PM" src="https://github.com/Wesleyan-Media-Project/fb_agg_reports_import/assets/17502191/b6852588-7dd4-413f-aa8b-2e99b0fea567">
 
-The unmatched quotation marks cause failure in the data input: the script misses the end of a field, and this leads to errors or to the loss of blocks of data.
+
+The unmatched quotation marks lead to serious failures with data import: when the script does not find the end of an enclosing quotation mark, it fails to read the fields that follow the problematic field. It then also fails to read several rows of data.
 
 Our way of handling this problem was to write our own import function. It performs CSV import of a single row of data. If the number of columns in the result does not match the expected number of columns, then the script removes all possible offending characters (single and double quotation marks) from the row and performs the import again. This way we have a record, and later on we match it manually to the information that is available via Facebook Ads API.
 
+#### Number cleanup
+
+When the amount of spend on ads is below 100, Facebook does not report the number and instead inserts the string "100![image](https://github.com/Wesleyan-Media-Project/fb_agg_reports_import/assets/17502191/787225ce-4d9a-46da-ae7e-f13c5b9489db)
+"
 
