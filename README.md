@@ -85,9 +85,22 @@ p = "\xef\xbb\xbf"
 
 Because the page name is the first column in the file, presence of this sequence meant that every 500th row contained incorrect page name and it would not match the other records. Our solution was to remove this sequence using regular expressions. We believe that this problem is no longer present, but as a safeguard the scripts still contain the instructions that search for this pattern.
 
-#### Permanent problem
+#### Permanent problem:
+
 This problem is caused not by something in the Facebook system, but by the user input. As the reader probably knows, many text editors will automatically replace the regular straight quotation marks with the "curly" quotation marks. This is done for aesthetic reasons. 
 
 Some of the entries in the report contain mismatched quotation marks which, most likely, arise in the following scenario: A user enclosed something into quotation marks, for instance, the nickname of a candidate, e.g. `Rob "Chip" Robbie`. The user was typing this in a text editor. The editor has converted one quotation symbol into the curly mark, but the other one stayed as the "straight" quotation marks. Facebook preserves user input and inserts it into the reports. CSV is a format that uses commas to separate fields in a record. If a text string inside a field contains a comma, then this field is enclosed into (is surrounded by) quotation marks. If the text already had quotation marks and they are unmatched (meaning there is an opening mark but it is not matched with aclosing mark), then the data parsing function will get confused and will incorrectly identify the boundary between fields.
 
+Here is an example of a record with this problem:
+
+<img width="786" alt="Screenshot 2023-06-04 at 10 48 04 PM" src="https://github.com/Wesleyan-Media-Project/fb_agg_reports_import/assets/17502191/3d9eb5ba-0f8b-4879-985b-10e0d33e4373">
+
+Notice how the opening quotation mark is straight, but the closing quotation mark is curly.
+
+
+The unmatched quotation marks cause failure in the data input: the script misses the end of a field, and this leads to errors or to the loss of blocks of data.
+
+Our way of handling this problem was to write our own import function. It performs CSV import of a single row of data. If the number of columns in the result does not match the expected number of columns, then the script removes all possible offending characters (single and double quotation marks) from the row and performs the import again. This way we have a record, and later on we match it manually to the information that is available via Facebook Ads API.
+
+From our experience, the problem of mismatched quotation marks occurs more often among small advertisers. They tend to pick disclaimer strings with more textual florishes (i.e., monickers in quotation marks)
 
