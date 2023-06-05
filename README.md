@@ -12,12 +12,12 @@ The scripts in this repo download the CSV files, clean up the data, import the d
 
 ## Data
 
-Meta/Facebook provides several files. They contain information on political and social-issue advertising on the platform and differ by the time span they cover.
+The reports page provides several files. They contain information on political and social-issue advertising on the platform and differ by the time span they cover.
 
 An individual record contains the following fields:
-* page id - a numeric id, uniquely identifying a page. This id does not change.
 * page name - text string with the current name of the page. Page names can be changed by owners. When an owner deletes their page, the report will contain a null string instead of the page name.
-* disclaimer, also known as "funding entity" or "paid for by". This is a text field that identifies the organization that paid for the specific ad. Providing this field is a requirement going back to the Federal Election Commission (FEC) rules.
+* page id - a numeric id, uniquely identifying a page. This id does not change.
+* disclaimer, also known as "funding entity" or "paid for by". This is a text field that identifies the organization that paid for the specific ad. Providing this field is mandatory and in the past, when some advertisers did not provide it, their ads were taken down. The "paid for by" string is a requirement linked to the Federal Election Commission (FEC) rules.
 * amount spent. The amount of money the specific page+funding_entity spent on the platform within the reporting time period. If the amount is less than 100 US dollars, the report will say "<= 100"
 * number of ads - total number of ads run on the platform by the specific page+funding_entity
 
@@ -56,7 +56,7 @@ The downloader is launched every 30 minutes using a crontab job. The script cont
 * `Weekly`, and 
 * `Daily`
 
-We use the 30 minute intervals as a protection against the situation when the Facebook team posts several reports in a quick succession. This happens occasionally, when the team falls behind the schedule. Normally, the webpage contains reports that lag about two days from the current day. On some occasions (around holidays like the Memorial Day or the Independence Day) the lag increases. The team then posts several reports, sometimes with an interval of one hour or so.
+We use the 30 minute intervals as a protection against the situation when the Facebook team posts several reports in a quick succession. This happens occasionally, when the team falls behind schedule. Normally, the webpage contains reports that lag about two days from the current day. On some occasions (around holidays like the Memorial Day or the Independence Day) the lag increases. The team then posts several reports, sometimes with an interval of one hour or so.
 
 The 30-minute interval is rooted in the legacy mode of operations when it was impossible to go back and retrieve the reports from previous days. With the new feature in place, the script can visit the page once per day. If there is a gap in reports, it can be manually filled.
 
