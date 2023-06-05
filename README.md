@@ -77,9 +77,17 @@ Scripts that import a table with the `region` column:
 
 The script perform some data cleanup. Specifically, there was one transient and one persistent problem with the data furnished by Facebook.
 
-Transient problem: 
->   p = "\xef\xbb\xbf"
-    tmp_text = gsub(p, "\n", tmp_text)
-    tmp_text = gsub("^\n", "", tmp_text)
-    
- 
+#### Transient problem: 
+The CSV files would contain a non-ASCII sequence of characters at the beginning of a line every 500 rows. This sequence is shown below:
+```
+p = "\xef\xbb\xbf"
+```
+
+Because the page name is the first column in the file, presence of this sequence meant that every 500th row contained incorrect page name and it would not match the other records. Our solution was to remove this sequence using regular expressions. We believe that this problem is no longer present, but as a safeguard the scripts still contain the instructions that search for this pattern.
+
+#### Permanent problem
+This problem is caused not by something in the Facebook system, but by the user input. As the reader probably knows, many text editors will automatically replace the regular straight quotation marks with the "curly" quotation marks. This is done for aesthetic reasons. 
+
+Some of the entries in the report contain mismatched quotation marks which, most likely, arise in the following scenario: A user enclosed something into quotation marks, for instance, the nickname of a candidate, e.g. `Rob "Chip" Robbie`. The user was typing this in a text editor. The editor has converted one quotation symbol into the curly mark, but the other one stayed as the "straight" quotation marks. Facebook preserves user input and inserts it into the reports. CSV is a format that uses commas to separate fields in a record. If a text string inside a field contains a comma, then this field is enclosed into (is surrounded by) quotation marks. If the text already had quotation marks and they are unmatched (meaning there is an opening mark but it is not matched with aclosing mark), then the data parsing function will get confused and will incorrectly identify the boundary between fields.
+
+
