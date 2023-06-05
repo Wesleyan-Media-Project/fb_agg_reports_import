@@ -100,7 +100,7 @@ Notice how in the `funding_entity` column, the quotation marks around the nickna
 
 This is an output of an R script that displays that field. The curly quotation mark on the right is more visible:
 
-<img width="355" alt="Screenshot 2023-06-04 at 10 55 32 PM" src="https://github.com/Wesleyan-Media-Project/fb_agg_reports_import/assets/17502191/b6852588-7dd4-413f-aa8b-2e99b0fea567">
+<img width="355" alt="Screenshot of an output of R code that shows the text string" src="https://github.com/Wesleyan-Media-Project/fb_agg_reports_import/assets/17502191/b6852588-7dd4-413f-aa8b-2e99b0fea567">
 
 
 The unmatched quotation marks lead to serious failures with data import: when the script does not find the end of an enclosing quotation mark, it fails to read the fields that follow the problematic field. It then also fails to read several rows of data.
@@ -109,6 +109,9 @@ Our way of handling this problem was to write our own import function. It perfor
 
 #### Number cleanup
 
-When the amount of spend on ads is below 100, Facebook does not report the number and instead inserts the string "100![image](https://github.com/Wesleyan-Media-Project/fb_agg_reports_import/assets/17502191/787225ce-4d9a-46da-ae7e-f13c5b9489db)
-"
+When the amount of spend on ads is below 100, Facebook does not report the number and instead inserts the string <img width="58" alt="image of a string saying less than or equal to 100" src="https://github.com/Wesleyan-Media-Project/fb_agg_reports_import/assets/17502191/8ec0b73b-f998-4e9d-ba38-c17113d53c17">
+
+
+
+
 
