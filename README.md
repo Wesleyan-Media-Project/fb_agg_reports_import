@@ -10,6 +10,53 @@ Wesleyan Media Project (WMP) monitors and reports on the spending by political c
 
 The scripts in this repo download the CSV files, clean up the data, import the data into a MySQL database running locally on a WMP server, and insert data into a table hosted in BigQuery in Google Cloud Platform.
 
+## Data
+
+Meta/Facebook provides several files. They contain information on political and social-issue advertising on the platform and differ by the time span they cover.
+
+An individual record contains the following fields:
+* page id - a numeric id, uniquely identifying a page. This id does not change.
+* page name - text string with the current name of the page. Page names can be changed by owners. When an owner deletes their page, the report will contain a null string instead of the page name.
+* disclaimer, also known as "funding entity" or "paid for by". This is a text field that identifies the organization that paid for the specific ad. Providing this field is a requirement going back to the Federal Election Commission (FEC) rules.
+* amount spent. The amount of money the specific page+funding_entity spent on the platform within the reporting time period. If the amount is less than 100 US dollars, the report will say "<= 100"
+* number of ads - total number of ads run on the platform by the specific page+funding_entity
+
+This kind of record is included in every type of the report. There are differences in how they are aggregated. 
+
+* The lifelong "all dates" report contains the totals going back to May 2018 when Facebook launched its archive of political ads. This report does not separate the activity by geographic regions (i.e, the US states and territories).
+* The time span reports ("last day", "last 7 days", "last 30 days", and "last 90 days") describe the activity during the specified time periods. The zip files with these reports contain separate CSV files for each region.
+
+### Naming conventions
+
+The Meta/Facebook team behind the ad library reports chose a convention where the information on the date and region covered in the report is contained in its filename. The reports are generated at the end of the day. Thus, the archive with the name `FacebookAdLibraryReport_2023-06-01_US_last_7_days.zip` will contain the data showing the activity during the week that **ends on June 1, 2023** - the period starting on May 26th and ending on June 1st, 2023. To paraphrase, the day of the report includes the activity on that day. (A subtler point is that this the date is defined by the Pacific Standard Time - the time zone of Meta/Facebook headquarters in Menlo Park, California.)
+
 ## Downloader
 
-The `fb_all_reports_download_v060123.py` script 
+Historically, the FB Ad Library Report page was the part that spurred the most modifications to the pipeline. There were occasional redesigns of the page that required rewriting the downloader script. In addition, even though this is a public-facing page, Meta implements protection against bots. If you try to access the page too many times, you will be served a "please log in" page instead of the normal data dashboard. This has happened to WMP and required an intervention from the Facebook counterpart who asked the engineering team in charge of the reports page to white-list the IP address of the server used by the WMP.
+
+In January 2023 Facebook has rolled out the new version of the webpage. It allows for downloads of reports going seven days back. This is a big improvement, because it greatly reduces the amount of labor required to manually download the data in case the downloading script breaks down. Now a user can visit the page once a week and download the required files.
+
+Here is how the downloading part of the page looks now:
+
+<img width="626" alt="Screenshot 2023-06-04 at 5 40 42 PM" src="https://github.com/Wesleyan-Media-Project/fb_agg_reports_import/assets/17502191/d2f5ba85-963f-49c0-8e2d-db59d805faed">
+
+The `fb_all_reports_download_v060123.py` is a Python/Selenium script that runs on a Linux-based machine and uses Chrome running in the headless mode. There are two heavily technical points worth knowing:
+
+* Enabling the downloads. By default, as a security precuation, browsers running in headless mode will not download files. The downloads need to be enabled explicitly. Our script uses the Chrome API where the `command_executor` module sends a POST request to the browser to enable the downloads and change the destination directory. This is a highly technical and poorly documented feature that, probably, is dependent on the version of the Chrome. For instance, Firefox uses a different set of instructions that are passed through the browser profile file.
+* Triggering the download. The drop-down menu in the downloads section is actually a collection of `div` tags and is not a menu. In the past, the engineering team would change the spelling of the "download report" phrase and there was also a situation that there were actually two "download report" links in the page: one was visible, and the other one was not - it was part of the menu that would open up for users on a mobile platform.
+
+We are providing a version of the script that can run in a Google Colab notebook: `facebook_reports_downloader_firefox.ipynb`. Because the newer versions of Colab made installation of Chrome very difficult, the script uses headless Firefox that is installed when the notebook is initialized.
+
+### Operation
+
+The downloader is launched every 30 minutes using a crontab job. The script contains a for-loop that downloads the latest version of each kind of report into its own directory on our server. The names of the directories are:
+* `Lifelong`
+* `90Days`
+* `30Days`
+* `Weekly`, and 
+* `Daily`
+
+We use the 30 minute intervals as a protection against the situation when the Facebook team posts several reports in a quick succession. This happens occasionally, when the team falls behind the schedule. Normally, the webpage contains reports that lag about two days from the current day. On some occasions (around holidays like the Memorial Day or the Independence Day) the lag increases. The team then posts several reports, sometimes with an interval of one hour or so.
+
+Again, this behavior is rooted in the legacy mode of operations when it was impossible to go back and retrieve the reports from previous days. With the new feature in place, the script can visit the page once per day. If there is a gap in reports, it can be manually filled.
+
