@@ -6,13 +6,13 @@ library(RMySQL)
 
 source("read_fb_file.R")
 
-conn = dbConnect(RMySQL::MySQL(), host="localhost",
+conn = dbConnect(RMySQL::MySQL(), host="xxx.xxx.xx.xx", ## replace with IP address of the host or 'localhost'
                  user="xxxx", password="xxxx",
-                 dbname="textsim_new")
+                 dbname="dbase1")
 
 d = dbGetQuery(conn, "select distinct date from fb_daily")
 
-data_files = list.files(path="/home/poleinikov/FB_reports/Daily", 
+data_files = list.files(path="./FB_reports/Daily", 
                         pattern="FacebookAdLibraryReport_.*_US_yesterday.zip",
                         full.names = T)
 
@@ -41,14 +41,14 @@ if (nrow(df) > 0) {
     cat("Processing file", df$fname[j], "\n")
     ## clean up the tmp directory
     ## First, remove files in the regions folder
-    previous_files = list.files(path="/home/poleinikov/FB_reports/tmp/regions", 
+    previous_files = list.files(path="./FB_reports/tmp/regions", 
                                 full.names = T, recursive=F,
                                 include.dirs=F)
     
     file.remove(previous_files, recursive=T)
     
     ## then remove files in the parent folder, which will include the (now empty) regions folder
-    previous_files = list.files(path="/home/poleinikov/FB_reports/tmp", 
+    previous_files = list.files(path="./FB_reports/tmp", 
                                 full.names = T, recursive=T,
                                 include.dirs=T)
     
@@ -56,9 +56,9 @@ if (nrow(df) > 0) {
     
     ## unzip a report file
     unzip(zipfile = df$fname[j],
-          exdir = "/home/poleinikov/FB_reports/tmp")
+          exdir = "./FB_reports/tmp")
     
-    data_files = list.files(path="~/FB_reports/tmp", 
+    data_files = list.files(path="./FB_reports/tmp", 
                             pattern="FacebookAdLibraryReport.+yesterday_advertisers.csv",
                             full.names = T, 
                             recursive=F, 
