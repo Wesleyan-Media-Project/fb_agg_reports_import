@@ -5,3 +5,6 @@ mkdir ./FB_reports/Weekly
 mkdir ./FB_reports/30Days
 mkdir ./FB_reports/90Days
 mkdir ./FB_reports/Lifelong
+mkdir ./FB_reports/Logs
+mkdir ./FB_reports/crontab_logs
+
