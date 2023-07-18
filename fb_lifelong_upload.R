@@ -8,14 +8,14 @@ library(RMySQL)
 source("read_fb_file.R")
 
 ## open a connection to the MySQL server
-conn = dbConnect(RMySQL::MySQL(), host="localhost",
+conn = dbConnect(RMySQL::MySQL(), host="xxx.xxx.xx.xx", ## replace the 'host' with IP address or 'localhost
                  user="xxxx", password="xxxx",
-                 dbname="textsim_new")
+                 dbname="dbase1")
 
 sql = 'select distinct date from fb_lifelong'
 previous_dates = dbGetQuery(conn, sql)
 
-data_files = list.files(path="/home/poleinikov/FB_reports/Lifelong", 
+data_files = list.files(path="./FB_reports/Lifelong", 
                         pattern="FacebookAdLibraryReport_.*_US_lifelong.zip",
                         full.names = T)
 
@@ -32,9 +32,11 @@ k = report_date %in% c(previous_dates$date)
 df = df %>% filter(!k, report_date >= "2021-01-06")
 
 
-bq_auth(path="/home/poleinikov/wmp-laura.json")
+bq_auth(path="wmp-sandbox-key-file.json") ## replace with the actual filename of your service account key file
 
-bqt = bq_table(project="wmp-laura", dataset="fb_lifelong", table="fb_lifelong")
+## wmp-sandbox is the name of GCP project, my_ad_archive is the dataset in BigQuery in your project
+## replace if necessary
+bqt = bq_table(project="wmp-sandbox", dataset="my_ad_archive", table="fb_lifelong")
 
 ## unzip the file into a tmp directory
 ## read the file
@@ -46,16 +48,16 @@ if (nrow(df) > 0) {
   for (j in 1:nrow(df)) {
     cat("Processing file", df$fname[j], "\n")
     ## clean up the tmp directory
-    previous_files = list.files(path="/home/poleinikov/FB_reports/tmp", 
+    previous_files = list.files(path="./FB_reports/tmp", 
                                 full.names = T, recursive=T)
     file.remove(previous_files, recursive=T)
     
     ## unzip a report file
     unzip(zipfile = df$fname[j],
-          exdir = "/home/poleinikov/FB_reports/tmp")
+          exdir = "./FB_reports/tmp")
     
     ## get the path to the CSV file with advertiser info
-    csv_files = list.files(path="/home/poleinikov/FB_reports/tmp", 
+    csv_files = list.files(path="./FB_reports/tmp", 
                            pattern="FacebookAdLibraryReport(Revamp)?_.*_US_lifelong_advertisers.csv",
                            full.names = T)
     
