@@ -10,6 +10,8 @@ Wesleyan Media Project (WMP) monitors and reports on the spending by political c
 
 The scripts in this repo download the CSV files, clean up the data, import the data into a MySQL database running locally on a WMP server, and insert data into a table hosted in BigQuery in Google Cloud Platform.
 
+Instructions on how to set up the proper file directory structure, create the tables in MySQL, and enable uploads into BigQuery can be found in the Setup section at the end of this document.
+
 ## Data
 
 The reports page provides several files. They contain information on political and social-issue advertising on the platform and differ by the time span they cover.
@@ -25,6 +27,8 @@ This kind of record is included in every type of the report. There are differenc
 
 * The lifelong "all dates" report contains the totals going back to May 2018 when Facebook launched its archive of political ads. This report does not separate the activity by geographic regions (i.e, the US states and territories).
 * The time span reports ("last day", "last 7 days", "last 30 days", and "last 90 days") describe the activity during the specified time periods. The zip files with these reports contain separate CSV files for each region.
+
+The lifelong report does not contain a breakdown by the US state. Other reports do contain the breakdown. The state-level values are reported in separate files, one file per U.S. state.
 
 ### Naming conventions
 
@@ -49,16 +53,14 @@ We are providing a version of the script that can run in a Google Colab notebook
 
 ### Operation
 
-The downloader is launched every 30 minutes using a crontab job. The script contains a for-loop that downloads the latest version of each kind of report into its own directory on our server. The names of the directories are:
+The downloader is launched every two hours using a crontab job. The script contains a for-loop that downloads the latest version of each kind of report into its own directory on our server. The names of the directories are:
+
 * `Lifelong`
 * `90Days`
 * `30Days`
 * `Weekly`, and 
 * `Daily`
 
-We use the 30 minute intervals as a protection against the situation when the Facebook team posts several reports in a quick succession. This happens occasionally, when the team falls behind schedule. Normally, the webpage contains reports that lag about two days from the current day. On some occasions (around holidays like the Memorial Day or the Independence Day) the lag increases. The team then posts several reports, sometimes with an interval of one hour or so.
-
-The 30-minute interval is rooted in the legacy mode of operations when it was impossible to go back and retrieve the reports from previous days. With the new feature in place, the script can visit the page once per day. If there is a gap in reports, it can be manually filled.
 
 ## Data import
 
