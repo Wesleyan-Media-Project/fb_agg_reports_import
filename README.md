@@ -130,6 +130,58 @@ Here is a screenshot showing the data up to June 1, 2023. The drops indicate the
 
 ![chart](https://github.com/Wesleyan-Media-Project/fb_agg_reports_import/assets/17502191/74af6049-edfb-462b-9ab4-0217212b7593)
 
+## The Setup
+
+In order to have the scripts run, you need to do several steps: 
+* create file directories for each type of report
+* create tables in your MySQL/MariaDB instance that will store the data
+* create the table in your project in Google Cloud Platform to store the `lifelong` report
+* download the service account key file from GCP to authenticate script access to BigQuery.
+
+### Local file directories
+
+In your working directory, run the command line statements contained in the file `create_agg_file_folders.sh` file. You can either copy the statements in an editor and paste them at the command line, or execute the whole file by using the bash interpreter: 
+
+```
+bash create_agg_file_folders.sh
+```
+
+### MySQL tables
+
+The `fb_agg_report_mysql_tables.sql` file contains the SQL statements that will create the required tables. Execute them by copy-pasting them at the command prompt in MySQL.
+
+### BigQuery table
+
+If you have not done this yet, please create a Google Cloud Platform project. For instructions, watch the tutorial [link]. Going through the steps should make you have a project (in our demo its name is `wmp-sandbox`) and a BigQuery dataset `my_ad_archive`.
+
+Go to your project and navigate to the BigQuery console. Execute the following statement in the editor of the console:
+
+```
+CREATE TABLE
+  my_ad_archive.fb_lifelong (
+    page_name STRING,
+    disclaimer STRING,
+    page_id STRING,
+    amt_spent INTEGER,
+    num_of_ads INTEGER,
+    date STRING );
+    
+```
+
+### GCP service account key file
+
+Navigate to the IAM & Admin tab in your GCP project. Select "Service accounts". Go through the steps and create a service account. Enter `wmp-sandbox` in the "Service account name" field. The "Service account ID" field will be auto-populated. Click "CREATE AND CONTINUE". This will take you to Step 2, "Grant this service account access to project" tab. In the "Select a role" dropdown list, choose "Owner". This will grant the account all privileges, including operations with BigQuery.
+Click "DONE".
+
+After a few seconds, you will be taken back to the Service Accounts page. This time, however, there will be an entry for the service account that you just created. 
+
+Under the "Actions" menu on the right side, click the vertical ellipses and click "Manage keys". You will be taken to the page that says "KEYS". Click the drop-down button "Add key". Select "Create new key" and select "JSON". A JSON file will be created and automatically downloaded on your computer. This file is the service account key file that you will need.
+
+Note: Google advises against granting unnecessarily wide privileges to a service account. "Owner" is the simplest role, but it can lead to trouble if your service account key file falls into the wrong hands. When you learn more about GCP operations, it is a good idea to create a new service account that is authorized only to retrieve data from BigQuery. Do not post the key file where outsiders can download it.
+
+Take note of the name of the key file. Update the `fb_lifelong_upload.R` file so that it contains the correct name of the service account key file.
+
+Now you are ready to launch the scripts and start collecting the data.
 
 
 
