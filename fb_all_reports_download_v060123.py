@@ -14,7 +14,7 @@ import datetime as dt
 user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.2 Safari/605.1.15,gzip(gfe)'
 
 options = Options()
-prefs = {'download.default_directory' : '/home/poleinikov'}
+prefs = {'download.default_directory' : '/home/username'} ## modify the home directory path
 options.add_experimental_option("prefs", prefs)
 options.add_argument('--window-size=1200x800')
 options.add_argument(f'user-agent={user_agent}')
@@ -24,7 +24,9 @@ options.headless = True
 driver = webdriver.Chrome(options=options, executable_path='/home/poleinikov/chromedriver')
 driver.get("https://www.facebook.com/ads/library/report/?source=archive-landing-page&country=US")
 time.sleep(60)
-driver.save_screenshot('/home/poleinikov/crontab_logs/first_screen_' + dt.datetime.now().strftime("%Y_%m_%d_%H_%M") + '.png')
+
+## modify the '/home/username/' path
+driver.save_screenshot('/home/username/FB_reports/crontab_logs/first_screen_' + dt.datetime.now().strftime("%Y_%m_%d_%H_%M") + '.png')
 
 tabs = ['Last day', 'Last 7 days', 'Last 30 days', 'Last 90 days', 'All dates']
 dl_folders = ['Daily', 'Weekly', '30Days', '90Days', 'Lifelong']
@@ -53,9 +55,11 @@ for i in range(dl_df.shape[0]):
     
     ## on its own Chrome in headless mode will not perform downloads, as a security feature
     ## to enable downloads, it is necessary to execute a command
+    
+    ## modify the '/home/username' path
     params = {'cmd': 'Page.setDownloadBehavior', 
             'params': {'behavior': 'allow', 
-                        'downloadPath': '/home/poleinikov/FB_reports/' + folder}
+                        'downloadPath': '/home/username/FB_reports/' + folder}
         }
     ## print(params)
     command_result = driver.execute("send_command", params)
