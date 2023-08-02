@@ -88,7 +88,7 @@ if (nrow(df) > 0) {
       ## older files contain 5 columns, newer files have only 4
       ## This post and example says the result will be fine - 
       ## the specification will be ignored when there are only 4 columns
-      d = read_csv(file=tmp_text, guess_max=10000, col_types="cccc?")
+      d = read_csv(file=I(tmp_text), guess_max=10000, col_types="cccc?")
       colnames(d) = col_names[1:(ncol(d))]
       
       d %>% mutate(page_id = gsub("[^0-9]", "", page_id),
