@@ -65,7 +65,7 @@ Since 2018, platforms like Google and Facebook have launched public archives of 
 
 With this repo you will collect political advertising reports from Facebook, clean the data in these reports and insert them into MySQL (all reports) and BigQuery (Lifelong only) for further analysis. Here is a screenshot of the BigQuery page that shows what the end result (e.g., table of Lifelong report) looks like.
 
-![bigquery](https://github.com/Wesleyan-Media-Project/fb_agg_reports_import/assets/93638016/6a26a437-c641-437a-a70d-7427b5e2d6f3)
+![bigquery1](https://github.com/Wesleyan-Media-Project/fb_agg_reports_import/assets/93638016/9653152c-4777-476e-aedd-12b16a03aea9)
 
 See [Data](#data) section for more information on variables.
 
