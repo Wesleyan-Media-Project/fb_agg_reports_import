@@ -1,16 +1,74 @@
-# fb_agg_reports_import
-Collection of scripts that download and import the Facebook Ad Library aggregate reports in CSV format
+# Wesleyan Media Project - Facebook Aggregate Reports Import
 
+Welcome to Wesleyan Media Project (WMP)'s Facebook Aggregate Reports Import Repository. This repo is part of the CREATIVE project which aims to acquire digital advertising across platforms along with candidate and sponsor data as well as processing and standardizing these data (For more information on the CREATIVE, click [here](https://www.creativewmp.com/)). To that end, we created this repo to enable researchers to collect and clean advertising reports from Facebook, ready to be analyzed. The objective of this repo is twofold. 
 
-<img width="1674" alt="fb_agg_report_scripts" src="https://github.com/Wesleyan-Media-Project/fb_agg_reports_import/assets/17502191/b04b8e5b-e719-40db-92b9-8ee676b64935">
+1. Download the advertising reports from [Facebook Ad Library](https://www.facebook.com/ads/library/report/?source=archive-landing-page&country=US) in CSV format. Reports are downloaded as `Daily`, `Weekly`, `30 Days`, `90 Days`, and `Lifelong`.
+2. Clean and insert these reports to MySQL database (all reports) and BigQuery (Lifelong only) for analysis.
+
+Check out the [Introduction](#introduction) to learn more about the aim of the repo as well as the steps taken.
+
+If you would like to start running the scripts in this repo, check out the [Setup](#setup) section to learn about the steps you need to follow.
+
+## Table of Contents
+
+- [Introduction](#introduction)
+    - [Objective](#objective)
+- [Data](#data)
+    - [Naming Conventions](#naming-conventions)
+- [Downloader](#downloader)
+    - [Operation](#operation)
+- [Data Import](#data-import)
+    - [Data Cleanup](#data-cleanup)
+        - [Transient Problem](#transient-problem)
+        - [Permanent Problem](#permanent-problem)
+        - [Number Cleanup](#number-cleanup)
+    - [BigQuery](#bigquery)
+- [Setup](#setup)
+    - [1. Create Directories](#local-file-directories)
+    - [2. Create MySQL Tables](#mysql-tables)
+    - [3. Create BigQuery Table](#bigquery-table)
+    - [4. Acquire the GCP Service Account Key File](#gcp-service-account-key)
+    - [5. Download the Reports](#download-reports)
+    - [6. Upload Reports to MySQL](#upload-to-mysql)
+        - [6a. Insert Lifelong Report to BigQuery](#lifelong-to-bigquery)
 
 ## Introduction
 
-Wesleyan Media Project (WMP) monitors and reports on the spending by political campaigns. To do this, WMP collects data from the Facebook Ad Library Report ([https://www.facebook.com/ads/library/report/?source=archive-landing-page&country=US](https://www.facebook.com/ads/library/report/?source=archive-landing-page&country=US)) for the United States. The report is a collection of zipped CSV files that differ by time span and geographic coverage. Example of the reports for June 1, 2023, is contained in the fodler `/data`.
+<img width="1674" alt="fb_agg_report_scripts" src="https://github.com/Wesleyan-Media-Project/fb_agg_reports_import/assets/17502191/b04b8e5b-e719-40db-92b9-8ee676b64935">
 
-The scripts in this repo download the CSV files, clean up the data, import the data into a MySQL database running locally on a WMP server, and insert data into a table hosted in BigQuery in Google Cloud Platform.
+Wesleyan Media Project (WMP) monitors and reports on the spending by political campaigns. To do this, WMP collects data from the Facebook Ad Library Report ([https://www.facebook.com/ads/library/report/?source=archive-landing-page&country=US](https://www.facebook.com/ads/library/report/?source=archive-landing-page&country=US)) for the United States. The report is a collection of zipped CSV files that differ by time span and geographic coverage. Example of the reports for June 1, 2023, is contained in the folder `/data`.
 
-Instructions on how to set up the proper file directory structure, create the tables in MySQL, and enable uploads into BigQuery can be found in the Setup section at the end of this document.
+The scripts in this repo let you do the following things:
+
+1. Create a folder for each report to be downloaded to. This is achieved by the `create_agg_file_folders.sh` file.
+
+2. Download the reports CSV files (Daily, Weekly, 30 Days, 90 Days, and Lifelong). This is achieved by the `fb_all_reports_download_v060123.py` file. Check out the __[Data](#data)__ section to learn more about the reports.
+
+3. Create tables in MySQL for each report. This is achieved by the `fb_agg_report_mysql_tables.sql` file.
+
+4. Clean up the data and import the data into a MySQL database running locally on a WMP server
+
+5. (For Lifelong only) Insert data into a table hosted in BigQuery in Google Cloud Platform
+
+You will use the corresponding R files for steps 4 and 5. Each report has its own R file. For example, you will use the `fb_lifelong_upload.R` file if you want to insert the Lifelong report to your BiqQuery table. 
+
+Instructions on how to set up the proper file directory structure, create the tables in MySQL, and enable uploads into BigQuery can be found in the __[Setup](#setup)__ section at the end of this document.
+
+### Objective
+
+This repository is part of the CREATIVE project which has two main aims
+
+1. Acquire digital advertising across platforms (including content, spending, impression and sponsor names) along with candidate and sponsor data.
+2. Process and integrate all content data through human and state-of-the-art computational methods to produce validated labels for analysis and distribution.
+
+Since 2018, platforms like Google and Facebook have launched public archives of political ad spending on their platforms. The archives come in different formats and may lack certain information. In addition, platform ad libraries are dynamic and changing (and data can disappear). Thus, this project aims to utilize computational techniques to enable easy-to-access, shared baseline information critical to answering a host of important research questions about democracy.
+
+With this repo you will collect political advertising reports from Facebook, clean the data in these reports and insert them into MySQL (all reports) and BigQuery (Lifelong only) for further analysis. Here is a screenshot of the BigQuery page that shows what the end result (e.g., table of Lifelong report) looks like.
+
+See [Data](#data) section for more information on variables.
+
+What can you do with this data? Some examples?
+We believe that this data could be used to address important issues including basic descriptive questions about the scope and content of election advertising for different offices across sources along with questions about effect such as how digital advertising influences election outcomes, the role of dark money in digital campaigns, and the spread and reach of misinformation in online political advertising.
 
 ## Data
 
@@ -46,7 +104,7 @@ Here is how the downloading part of the page looks now:
 
 The `fb_all_reports_download_v060123.py` is a Python/Selenium script that runs on a Linux-based machine and uses Chrome running in the headless mode. There are two heavily technical points worth knowing:
 
-* Enabling the downloads. By default, as a security precuation, browsers running in headless mode will not download files. The downloads need to be enabled explicitly. Our script uses the Chrome API where the `command_executor` module sends a POST request to the browser to enable the downloads and change the destination directory. This is a highly technical and poorly documented feature that, probably, is dependent on the version of the Chrome. For instance, Firefox uses a different set of instructions that are passed through the browser profile file.
+* Enabling the downloads. By default, as a security precaution, browsers running in headless mode will not download files. The downloads need to be enabled explicitly. Our script uses the Chrome API where the `command_executor` module sends a POST request to the browser to enable the downloads and change the destination directory. This is a highly technical and poorly documented feature that, probably, is dependent on the version of the Chrome. For instance, Firefox uses a different set of instructions that are passed through the browser profile file.
 * Triggering the download. The drop-down menu in the downloads section is actually a collection of `div` tags and is not a menu. In the past, the engineering team would change the spelling of the "download report" phrase and there was also a situation that there were actually two "download report" links in the page: one was visible, and the other one was not - it was part of the menu that would open up for users on a mobile device.
 
 We are providing a version of the script that can run in a Google Colab notebook: `facebook_reports_downloader_firefox.ipynb`. Because the newer versions of Colab made installation of Chrome very difficult, the script uses headless Firefox that is installed when the notebook is initialized.
@@ -62,7 +120,7 @@ The downloader is launched every two hours using a crontab job. The script conta
 * `Daily`
 
 
-## Data import
+## Data Import
 
 A set of scripts scans the directories listed above and, if there are new files, imports them into the MySQL database. These scripts fall into two groups: with and without region data.
 
@@ -75,11 +133,11 @@ Scripts that import a table with the `region` column:
 * `fb_30days_regions_import.R`, and 
 * `fb_90days_regions_import.R`
 
-### Data cleanup
+### Data Cleanup
 
 The scripts perform some data cleanup. Specifically, there was one transient and one persistent problem with the data furnished by Facebook.
 
-#### Transient problem: 
+#### Transient Problem: 
 The CSV files would contain a non-ASCII sequence of characters at the beginning of a line every 500 rows. This sequence is shown below:
 ```
 p = "\xef\xbb\xbf"
@@ -87,7 +145,7 @@ p = "\xef\xbb\xbf"
 
 Because the page name is the first column in the file, presence of this sequence meant that every 500th row contained incorrect page name and it would not match the other records. Our solution was to remove this sequence using regular expressions. We believe that this problem is no longer present, but as a safeguard the scripts still contain the instructions that search for this pattern.
 
-#### Permanent problem:
+#### Permanent Problem:
 
 This problem is caused not by something in the Facebook system, but by the user input. As the reader probably knows, many text editors will automatically replace the regular straight quotation marks with the "curly" quotation marks. This is done for aesthetic reasons. 
 
@@ -104,12 +162,11 @@ Below is an output of an R script that displays that field. The curly quotation 
 
 <img width="355" alt="Screenshot of an output of R code that shows the text string" src="https://github.com/Wesleyan-Media-Project/fb_agg_reports_import/assets/17502191/b6852588-7dd4-413f-aa8b-2e99b0fea567">
 
-
 The unmatched quotation marks lead to serious failures with data import: when the script does not find the end of an enclosing quotation mark, it fails to read the fields that follow the problematic field. It then also fails to read several rows of data - they are ingested as if they were part of one data row.
 
 Our way of handling this problem was to write our own import function. It is contained in the script `read_fb_file.R`. It performs CSV import of a single row of data. If the number of columns in the result does not match the expected number of columns, then the script removes all double quotation marks from the row and performs the import again. This way we have a record, and later on we can match it manually to the name and disclaimer available via Facebook Ads API.
 
-#### Number cleanup
+#### Number Cleanup
 
 When the amount of spend on ads is below 100, Facebook does not report the number and instead inserts the string 
 
@@ -124,33 +181,64 @@ As a side note, once an advertiser has exceeded the threshold of 100 USD, Facebo
 
 Part of the reporting done by WMP during elections involves reporting the total spend on Facebook ads. The lifelong report serves this purpose perfectly. Because not everyone on the WMP team is proficient with writing SQL queries, we have come up with a workflow where the data is stored in BigQuery and the end user can explore the data using the BigQuery connector in Google Sheets.
 
-For this reason, the `fb_lifelong_upload.R` script uploads the data to BigQuery after it imports the data into MySQL. We also use the table in BigQuery as a source for the diganostic chart showing the time series of the total number of ads and total spend reported by Facebook. The chart is available as a publicly viewable graphic accessible at this [link](https://docs.google.com/spreadsheets/d/1A9laSAxrBJ2I6osWm6qcUFBmKoZeFN_tcjFEvbnrWFs/edit#gid=0)
+For this reason, the `fb_lifelong_upload.R` script uploads the data to BigQuery after it imports the data into MySQL. We also use the table in BigQuery as a source for the diagnostic chart showing the time series of the total number of ads and total spend reported by Facebook. The chart is available as a publicly viewable graphic accessible at this [link](https://docs.google.com/spreadsheets/d/1A9laSAxrBJ2I6osWm6qcUFBmKoZeFN_tcjFEvbnrWFs/edit#gid=0)
 
 Here is a screenshot showing the data up to June 1, 2023. The drops indicate the days when Facebook "lost" the ads, and the spikes - the days when the number of ads and the spend was "over-reported". Our intention behind this chart is to show which days must be avoided if someone decides to write a story about campaign spending on Facebook.
 
 ![chart](https://github.com/Wesleyan-Media-Project/fb_agg_reports_import/assets/17502191/74af6049-edfb-462b-9ab4-0217212b7593)
 
-## The Setup
+## Setup
 
-In order to have the scripts run, you need to do several steps: 
-* create file directories for each type of report
-* create tables in your MySQL/MariaDB instance that will store the data
-* create the table in your project in Google Cloud Platform to store the `lifelong` report
-* download the service account key file from GCP to authenticate script access to BigQuery.
+In order to have the scripts run, you need to follow several steps: 
 
-### Local file directories
+1. Create local file directories for each type of report
+2. Create tables in your MySQL/MariaDB instance that will store the data
+3. Create the table in your project in Google Cloud Platform to store the `lifelong` report
+4. Download the service account key file from GCP to authenticate script access to BigQuery
+5. Download the Facebook Ad Reports for each time frame
+6. Clean and upload reports to MySQL
+    - 6a. Insert `lifelong` reports to BigQuery table (Lifelong only)
 
-In your working directory, run the command line statements contained in the file `create_agg_file_folders.sh` file. You can either copy the statements in an editor and paste them at the command line, or execute the whole file by using the bash interpreter: 
+### 1. Create Directories
+
+Open the command prompt in your local machine. Navigate to your working directory if needed using the `cd path/to/your/directory` command (replace the `path/to/your/directory` part with your working directory. Once you get to your working directory, run the command line statements contained in the file `create_agg_file_folders.sh` file. You can either copy the statements in an editor and paste them at the command line, or execute the whole file by using the bash interpreter: 
 
 ```
 bash create_agg_file_folders.sh
 ```
 
-### MySQL tables
+This will create a `FB_report` parent folder with a folder for each type of report in it. It will also create `tmp`, `Logs`, and `crontab_logs` folders which will be utilized when running the R scripts.
 
-The `fb_agg_report_mysql_tables.sql` file contains the SQL statements that will create the required tables. Execute them by copy-pasting them at the command prompt in MySQL.
+### 2. Create MySQL Tables
 
-### BigQuery table
+Next step is to create MySQL tables for each report which will store the data. The `fb_agg_report_mysql_tables.sql` file contains the SQL statements that will create the required tables. Follow the steps below to execute them:
+
+- Open terminal (Command Prompt) in your machine.
+- Connect to MySQL: Start the MySQL command-line client and connect to your MySQL server using the following command:
+
+```
+mysql -u username -p
+```
+
+Replace `username` with your MySQL username. You will be prompted to enter the password for the specified MySQL user.
+
+- (Optional) Select Database: If you want to create the table in a specific database, you can select that database using the `USE` statement:
+
+```
+USE your_database;
+```
+
+- Run the .sql File: To execute the .sql file, use the source command followed by the full path to the .sql file. Replace `/path/to/your_file.sql` with the actual path to your .sql file.
+
+```
+source /path/to/your_file.sql
+```
+
+Alternatively, you can also manually enter the queries in the .sql file within the MySQL command-line. If you wish to do this, be careful since some of the queries in this file are written in multiple lines. If you also want to write the query in multiple lines, make sure to use a backslash `\` at the end of each line.
+
+After running the sql queries, you will have tables for each report in your MySQL database, ready to be populated.
+
+### 3. Create BigQuery Table
 
 If you have not done this yet, please create a Google Cloud Platform project. For instructions, watch the tutorial [link]. Going through the steps should make you have a project (in our demo its name is `wmp-sandbox`) and a BigQuery dataset `my_ad_archive`.
 
@@ -168,7 +256,9 @@ CREATE TABLE
     
 ```
 
-### GCP service account key file
+This will create an empty table that can be populated with the `lifelong` report from Facebook.
+
+### 4. Acquire the GCP Service Account Key File
 
 Navigate to the IAM & Admin tab in your GCP project. Select "Service accounts". Go through the steps and create a service account. Enter `wmp-sandbox` in the "Service account name" field. The "Service account ID" field will be auto-populated. Click "CREATE AND CONTINUE". This will take you to Step 2, "Grant this service account access to project" tab. In the "Select a role" dropdown list, choose "Owner". This will grant the account all privileges, including operations with BigQuery.
 Click "DONE".
@@ -182,6 +272,28 @@ Note: Google advises against granting unnecessarily wide privileges to a service
 Take note of the name of the key file. Update the `fb_lifelong_upload.R` file so that it contains the correct name of the service account key file.
 
 Now you are ready to launch the scripts and start collecting the data.
+
+### 5. Download the Reports
+
+The first part of collecting data is to download the reports for all timelines.
+It is recommended to use a python virtual environment and install all necessary packages used in the script to that environment. You will also need Chrome and ChromeDriver located in the same directory as your Python virtual environment.
+
+- Install Chrome
+- ChromeDriver
+- Install Python
+- Create Python Venv
+- Install dependencies
+- Revise Python code
+- Run the code
+
+### 6. Upload Reports to MySQL
+
+- Install R
+- Install dependencies
+- Revise code
+- Run the R code using the command
+
+#### 6a. Insert Lifelong report to BigQuery
 
 
 
