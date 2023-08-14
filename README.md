@@ -24,13 +24,13 @@ If you would like to start running the scripts in this repo, check out the [Setu
         - [Number Cleanup](#number-cleanup)
     - [BigQuery](#bigquery)
 - [Setup](#setup)
-    - [1. Create Directories](#local-file-directories)
-    - [2. Create MySQL Tables](#mysql-tables)
-    - [3. Create BigQuery Table](#bigquery-table)
-    - [4. Acquire the GCP Service Account Key File](#gcp-service-account-key)
-    - [5. Download the Reports](#download-reports)
-    - [6. Upload Reports to MySQL](#upload-to-mysql)
-        - [6a. Insert Lifelong Report to BigQuery](#lifelong-to-bigquery)
+    - [1. Create Directories](#1-create-directories)
+    - [2. Create MySQL Tables](#2-create-mysql-tables)
+    - [3. Create BigQuery Table](#3-create-bigquery-table)
+    - [4. Acquire the GCP Service Account Key File](#4-acquire-the-gcp-service-account-key-file)
+    - [5. Download the Reports](#5-download-the-reports)
+    - [6. Upload Reports to MySQL](#6-upload-reports-to-mysql)
+        - [6a. Insert Lifelong Report to BigQuery](#6a-insert-lifelong-report-to-bigquery)
 
 ## Introduction
 
