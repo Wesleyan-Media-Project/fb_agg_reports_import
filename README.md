@@ -215,6 +215,7 @@ This will create a `FB_report` parent folder with a folder for each type of repo
 
 Next step is to create MySQL tables for each report which will store the data. The `fb_agg_report_mysql_tables.sql` file contains the SQL statements that will create the required tables. Follow the steps below to execute them:
 
+- Install MySQL
 - Open terminal (Command Prompt) in your machine.
 - Connect to MySQL: Start the MySQL command-line client and connect to your MySQL server using the following command:
 
@@ -277,26 +278,82 @@ Now you are ready to launch the scripts and start collecting the data.
 
 ### 5. Download the Reports
 
-The first part of collecting data is to download the reports for all timelines.
-It is recommended to use a python virtual environment and install all necessary packages used in the script to that environment. You will also need Chrome and ChromeDriver located in the same directory as your Python virtual environment.
+The first part of collecting data is to download the reports for all timelines. To do that, you need to follow the steps below:
 
-- Install Chrome
-- ChromeDriver
+- Install Chrome and ChromeDriver
+First, you need to have Chrome installed in your system. Next, you will download the files for ChromeDrive from the [ChromeDriver website](https://chromedriver.chromium.org/downloads). Please be advised that ChromeDrive may not support the latest version of Chrome. You can find which version of Chrome the ChromeDriver supports in their website. Once downloaded, you need to unzip the files to the destination of your `fb_all_reports_download_v060123.py` location, which is the python code you will use to download reports.
+
 - Install Python
-- Create Python Venv
-- Install dependencies
+You will need to have Python installed in your system as well. You can download the latest version of Python [here](https://www.python.org/downloads/) and check out the guide on how to install it [here](https://docs.python.org/3/using/index.html).
+
 - Revise Python code
+Before running the code, you need to make a few revisions to the script. First you need to open the `fb_all_reports_download_v060123.py` file. In your Terminal or Command Prompt, you can open and revise this file by running `nano fb_all_reports_download_v060123.py`. Once in the script, you can modify file at the directed locations. Once done, save and exit the file.
+
+- Create Python Venv
+It is recommended to use a python virtual environment and install all necessary packages used in the script to that environment. To create a virtual environment, you can run the following prompt:
+
+```
+python3 -m venv myenv
+```
+
+If you are getting error, make sure you have `virtualenv` package installed by running `pip install virtualenv` within python (run `python3` to open Python). Make sure to quit Python after installing this package by running `quit()`.
+
+You can activate this `myenv` by running either `source myenv/bin/activate` (For Linux/Mac) or `myenv\Scripts\activate.bat
+` (For Windows). Once you are done running your Python code later, you can close this environment by running `deactivate`.
+
+- Install dependencies
+The next step is to install the necessary packages to run the Pyhton code. The packages you need to run `fb_all_reports_download_v060123.py` file are:
+
+Selenium, Numpy, Pandas, Datetime
+
+You can install these packages by running the code (replace the PACKAGE_NAME with the package you want to install):
+
+```
+pip install PACKAGE_NAME
+```
+
 - Run the code
+To run the code, first, open Python using your Terminal (For Linux/Mac) or Command Prompt (For Windows). Simply write `python` or `python3` and click enter. You will see the name Python, its version and some more information. Next, run the `fb_all_reports_download_v060123.py` file by running the following code (assuming your file is in the same location with your python virtual environment:
+
+```
+python3 fb_all_reports_download_v060123.py
+```
+
+The code may take a while to run. Once done, you should be able to find the reports in your designated folder.
+
+(We are providing a version of the script that can run in a Google Colab notebook: `facebook_reports_downloader_firefox.ipynb`. Because the newer versions of Colab made installation of Chrome very difficult, the script uses headless Firefox that is installed when the notebook is initialized.)
 
 ### 6. Upload Reports to MySQL
+After downloading the reports, the next step is to upload them to MySQL. Here are the steps to follow:
 
 - Install R
-- Install dependencies
+First, you need to install R. You can download the latest version of R [here](https://cloud.r-project.org/) and check out the guide on how to install it by clicking the "Manuals" section.
+
 - Revise code
-- Run the R code using the command
+Next, you need to open and revise the R file you want to run. In your Terminal or Command Prompt, run `nano FILE_NAME.R` to open the R file you want to modify. Once opened, modify the file at the directed locations. Once done, save and exit the file.
+  
+- Install packages
+Once you installed R and revised the code, simply open your Terminal or Command Prompt and write `R` and click enter. You should see a prompt showing R's version. Before running the code, install the necessary packages by running the following code in R (replace the PACKAGE_NAME with the package you want to install):
+
+```
+install.packages("PACKAGE_NAME")
+```
+
+For all R scripts, you need to install three packages. These are `readr`, `dplyr`, and `RMySQL`. For the `fb_lifelong_upload.R` file, you need to install the `bigrquery`, in addition to the previous three. Once finished installing, quit R by typing `q()` and press enter.
+
+- Run the R code
+Before running, make sure you have the `read_fb_file.R` in the same location with your R file. To run the codes, you need to run the first line of the R file which should look something like:
+
+```
+nohup R CMD BATCH --no-save --no-restore fb_30days_regions_import.R  /home/username/FB_reports/Logs/30days_import_$(date +%Y-%m-%d).txt &
+```
+
+You need to modify the `/home/username/FB_reports/Logs` part with the directory you want to save the report file at. The `nohup` command (the name stands for "no hanging up") tells the operating system that the command/script should continue to run even when the user closes their terminal window. The `&`​ at the end instructs the shell to put the process into the background (without that, you won't be able to do anything with the CLI prompt since the shell will be waiting for your process to finish.). These are optional parts of the command. Once done, you gone open your report file to investigate whether your code ran successfully. 
 
 #### 6a. Insert Lifelong report to BigQuery
+If you wish to upload the lifelong report to MySQL, you need to run the R command for the `fb_lifelong_upload.R` file. Different then other files, this will also instert the report to BigQuery as a table.
 
+Keep in mind that, this code requires the GCP Service Account Key File in the same location with your R file. Make sure you have this JSON file. After running the code, you should be able to see that the BigQuery table for the lifelong report is populated with data from the report you downloaded.
 
 
 
