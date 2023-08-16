@@ -69,7 +69,8 @@ With this repo you will collect political advertising reports from Facebook, cle
 
 See [Data](#data) section for more information on variables.
 
-What can you do with this data? Some examples?
+#### What can you do with this data?
+
 We believe that this data could be used to address important issues including basic descriptive questions about the scope and content of election advertising for different offices across sources along with questions about effect such as how digital advertising influences election outcomes, the role of dark money in digital campaigns, and the spread and reach of misinformation in online political advertising.
 
 ## Data
