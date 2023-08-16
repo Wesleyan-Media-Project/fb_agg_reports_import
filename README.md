@@ -13,6 +13,7 @@ If you would like to start running the scripts in this repo, check out the [Setu
 
 - [Introduction](#introduction)
     - [Objective](#objective)
+        - [What can you do with this data?](#what-can-you-do-with-this-data)
 - [Data](#data)
     - [Naming Conventions](#naming-conventions)
 - [Downloader](#downloader)
