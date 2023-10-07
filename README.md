@@ -245,7 +245,7 @@ After running the sql queries, you will have tables for each report in your MySQ
 
 ### 3. Create BigQuery Table
 
-If you have not done this yet, please create a Google Cloud Platform project. For instructions, watch the tutorial [link]. Going through the steps should make you have a project (in our demo its name is `wmp-sandbox`) and a BigQuery dataset `my_ad_archive`.
+If you have not done this yet, please create a Google Cloud Platform project. For instructions, watch the tutorial [link to the video from Harry]. Going through the steps should make you have a project (in our demo its name is `wmp-sandbox`) and a BigQuery dataset `my_ad_archive`.
 
 Go to your project and navigate to the BigQuery console. Execute the following statement in the editor of the console:
 
