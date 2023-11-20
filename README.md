@@ -81,7 +81,7 @@ The reports page provides several files. They contain information on political a
 An individual record contains the following fields:
 * page name - text string with the current name of the page. Page names can be changed by owners. When an owner deletes their page, the report will contain a null string instead of the page name.
 * page id - a numeric id, uniquely identifying a page. This id does not change.
-* disclaimer, also known as "funding entity" or "paid for by". This is a text field that identifies the organization that paid for the specific ad. Providing this field is mandatory and in the past, when some advertisers did not provide it, their ads were taken down. The "paid for by" string is a requirement linked to the Federal Election Commission (FEC) rules.
+* disclaimer, also known as "funding entity" or "paid for by". This is a text field that identifies the organization that paid for the specific ad. Providing this field is mandatory and in the past, when some advertisers did not provide it, their ads were taken down. The "paid for by" string is a requirement of Federal Election Commission (FEC) rules.
 * amount spent. The amount of money the specific page+funding_entity spent on the platform within the reporting time period. If the amount is less than 100 US dollars, the report will say "<= 100"
 * number of ads - total number of ads run on the platform by the specific page+funding_entity
 
@@ -100,7 +100,7 @@ The Meta/Facebook team behind the ad library reports chose a convention where th
 
 Historically, the FB Ad Library Report page was the part that spurred the most modifications to the pipeline. There were occasional redesigns of the page that required rewriting the downloader script. In addition, even though this is a public-facing page, Meta implements protection against bots. If you try to access the page too many times, you will be served a "please log in" page instead of the normal data dashboard. This has happened to WMP and required an intervention from the Facebook counterpart who asked the engineering team in charge of the reports page to white-list the IP address of the server used by the WMP.
 
-In January 2023 Facebook has rolled out the new version of the webpage. It allows for downloads of reports going seven days back. This is a big improvement, because it greatly reduces the amount of labor required to manually download the data in case the downloading script breaks down. Now a user can visit the page once a week and download the required files.
+In January 2023 Facebook rolled out the new version of the webpage. It allows for downloads of reports going seven days back. This is a big improvement, because it greatly reduces the amount of labor required to manually download the data in case the downloading script breaks down. Now a user can visit the page once a week and download the required files.
 
 Here is how the downloading part of the page looks now:
 
@@ -155,7 +155,7 @@ This problem is caused not by something in the Facebook system, but by the user 
 
 Some of the entries in the report contain mismatched quotation marks which, most likely, arise in the following scenario: A user enclosed something into quotation marks, for instance, the nickname of a candidate, e.g. `Rob "Chip" Robbie`. The user was typing this in a text editor. The editor has converted one quotation symbol into the curly mark, but the other one stayed as the "straight" quotation marks. Facebook preserves user input and inserts it into the reports. CSV is a format that uses commas to separate fields in a record. If a text string inside a field contains a comma, then this field is enclosed into (is surrounded by) quotation marks. If the text already had quotation marks and they are unmatched (meaning there is an opening mark but it is not matched with a closing mark), then the data parsing function will incorrectly identify the boundary between fields.
 
-From our experience, the problem of mismatched quotation marks occurs more often among small advertisers. They tend to pick disclaimer strings with more textual flourishes (i.e., monickers in quotation marks). Here is an example of a record with this problem:
+From our experience, the problem of mismatched quotation marks occurs more often among small advertisers. They tend to pick disclaimer strings with more textual flourishes (i.e., monikers in quotation marks). Here is an example of a record with this problem:
 
 <img width="786" alt="Screenshot 2023-06-04 at 10 48 04 PM" src="https://github.com/Wesleyan-Media-Project/fb_agg_reports_import/assets/17502191/3d9eb5ba-0f8b-4879-985b-10e0d33e4373">
 
@@ -215,7 +215,7 @@ This will create a `FB_report` parent folder with a folder for each type of repo
 
 ### 2. Create MySQL Tables
 
-Next step is to create MySQL tables for each report which will store the data. The `fb_agg_report_mysql_tables.sql` file contains the SQL statements that will create the required tables. Follow the steps below to execute them:
+The next step is to create MySQL tables for each report which will store the data. The `fb_agg_report_mysql_tables.sql` file contains the SQL statements that will create the required tables. Follow the steps below to execute them:
 
 - Install MySQL
 - Open terminal (Command Prompt) in your machine.
@@ -282,16 +282,16 @@ Now you are ready to launch the scripts and start collecting the data.
 
 The first part of collecting data is to download the reports for all timelines. To do that, you need to follow the steps below:
 
-- Install Chrome and ChromeDriver
-First, you need to have Chrome installed in your system. Next, you will download the files for ChromeDrive from the [ChromeDriver website](https://chromedriver.chromium.org/downloads). Please be advised that ChromeDrive may not support the latest version of Chrome. You can find which version of Chrome the ChromeDriver supports in their website. Once downloaded, you need to unzip the files to the destination of your `fb_all_reports_download_v060123.py` location, which is the python code you will use to download reports.
+- Install Chrome and ChromeDriver.
+First, you need to have Chrome installed in your system. Next, you will download the files for ChromeDrive from the [ChromeDriver website](https://chromedriver.chromium.org/downloads). Please be advised that ChromeDriver may not support the latest version of Chrome. You can find which version of Chrome the ChromeDriver supports in their website. Once downloaded, you need to unzip the files to the destination of your `fb_all_reports_download_v060123.py` location, which is the python code you will use to download reports.
 
-- Install Python
+- Install Python.
 You will need to have Python installed in your system as well. You can download the latest version of Python [here](https://www.python.org/downloads/) and check out the guide on how to install it [here](https://docs.python.org/3/using/index.html).
 
-- Revise Python code
+- Revise Python code.
 Before running the code, you need to make a few revisions to the script. First you need to open the `fb_all_reports_download_v060123.py` file. In your Terminal or Command Prompt, you can open and revise this file by running `nano fb_all_reports_download_v060123.py`. Once in the script, you can modify file at the directed locations. Once done, save and exit the file.
 
-- Create Python Venv
+- Create Python Venv.
 It is recommended to use a python virtual environment and install all necessary packages used in the script to that environment. To create a virtual environment, you can run the following prompt:
 
 ```
@@ -314,7 +314,7 @@ You can install these packages by running the code (replace the PACKAGE_NAME wit
 pip install PACKAGE_NAME
 ```
 
-- Run the code
+- Run the code.
 To run the code, first, open Python using your Terminal (For Linux/Mac) or Command Prompt (For Windows). Simply write `python` or `python3` and click enter. You will see the name Python, its version and some more information. Next, run the `fb_all_reports_download_v060123.py` file by running the following code (assuming your file is in the same location with your python virtual environment:
 
 ```
@@ -331,10 +331,10 @@ After downloading the reports, the next step is to upload them to MySQL. Here ar
 - Install R
 First, you need to install R. You can download the latest version of R [here](https://cloud.r-project.org/) and check out the guide on how to install it by clicking the "Manuals" section.
 
-- Revise code
+- Revise code.
 Next, you need to open and revise the R file you want to run. In your Terminal or Command Prompt, run `nano FILE_NAME.R` to open the R file you want to modify. Once opened, modify the file at the directed locations. Once done, save and exit the file.
   
-- Install packages
+- Install packages.
 Once you installed R and revised the code, simply open your Terminal or Command Prompt and write `R` and click enter. You should see a prompt showing R's version. Before running the code, install the necessary packages by running the following code in R (replace the PACKAGE_NAME with the package you want to install):
 
 ```
@@ -343,7 +343,7 @@ install.packages("PACKAGE_NAME")
 
 For all R scripts, you need to install three packages. These are `readr`, `dplyr`, and `RMySQL`. For the `fb_lifelong_upload.R` file, you need to install the `bigrquery`, in addition to the previous three. Once finished installing, quit R by typing `q()` and press enter.
 
-- Run the R code
+- Run the R code.
 Before running, make sure you have the `read_fb_file.R` in the same location with your R file. To run the codes, you need to run the first line of the R file which should look something like:
 
 ```
@@ -353,9 +353,9 @@ nohup R CMD BATCH --no-save --no-restore fb_30days_regions_import.R  /home/usern
 You need to modify the `/home/username/FB_reports/Logs` part with the directory you want to save the report file at. The `nohup` command (the name stands for "no hanging up") tells the operating system that the command/script should continue to run even when the user closes their terminal window. The `&`​ at the end instructs the shell to put the process into the background (without that, you won't be able to do anything with the CLI prompt since the shell will be waiting for your process to finish.). These are optional parts of the command. Once done, you gone open your report file to investigate whether your code ran successfully. 
 
 #### 6a. Insert Lifelong report to BigQuery
-If you wish to upload the lifelong report to MySQL, you need to run the R command for the `fb_lifelong_upload.R` file. Different then other files, this will also instert the report to BigQuery as a table.
+If you wish to upload the lifelong report to MySQL, you need to run the R command for the `fb_lifelong_upload.R` file. Different than other files, this will also instert the report to BigQuery as a table.
 
-Keep in mind that, this code requires the GCP Service Account Key File in the same location with your R file. Make sure you have this JSON file. After running the code, you should be able to see that the BigQuery table for the lifelong report is populated with data from the report you downloaded.
+Keep in mind that this code requires the GCP Service Account Key File in the same location with your R file. Make sure you have this JSON file. After running the code, you should be able to see that the BigQuery table for the lifelong report is populated with data from the report you downloaded.
 
 
 
