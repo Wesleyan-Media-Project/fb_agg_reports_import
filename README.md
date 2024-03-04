@@ -1,6 +1,6 @@
 # Wesleyan Media Project - Facebook Aggregate Reports Import
 
-Welcome to Wesleyan Media Project (WMP)'s Facebook Aggregate Reports Import Repository. This repo is part of the CREATIVE project which aims to acquire digital advertising across platforms along with candidate and sponsor data as well as processing and standardizing these data (For more information on the CREATIVE, click [here](https://www.creativewmp.com/)). To that end, we created this repo to enable researchers to collect and clean advertising reports from Facebook, ready to be analyzed. The objective of this repo is twofold. 
+Welcome to Wesleyan Media Project (WMP)'s Facebook Aggregate Reports Import Repository. This repo is part of the CREATIVE project which aims to acquire digital advertising across platforms along with candidate and sponsor data as well as processing and standardizing these data (For more information on the CREATIVE, click [here](https://www.creativewmp.com/)). To that end, we created this repo to enable researchers to collect and clean advertising reports from Facebook, ready to be analyzed. The objective of this repo is twofold.
 
 1. Download the advertising reports from [Facebook Ad Library](https://www.facebook.com/ads/library/report/?source=archive-landing-page&country=US) in CSV format. Reports are downloaded as `Daily`, `Weekly`, `30 Days`, `90 Days`, and `Lifelong`.
 2. Clean and insert these reports to MySQL database (all reports) and BigQuery (Lifelong only) for analysis.
@@ -9,29 +9,33 @@ Check out the [Introduction](#introduction) to learn more about the aim of the r
 
 If you would like to start running the scripts in this repo, check out the [Setup](#setup) section to learn about the steps you need to follow.
 
+This repo is a part of the Data Collection step.
+
+![A picture of the repo pipeline with this repo highlighted](Creative_Pipelines.png)
+
 ## Table of Contents
 
 - [Introduction](#introduction)
-    - [Objective](#objective)
-        - [What can you do with this data?](#what-can-you-do-with-this-data)
+  - [Objective](#objective)
+    - [What can you do with this data?](#what-can-you-do-with-this-data)
 - [Data](#data)
-    - [Naming Conventions](#naming-conventions)
+  - [Naming Conventions](#naming-conventions)
 - [Downloader](#downloader)
-    - [Operation](#operation)
+  - [Operation](#operation)
 - [Data Import](#data-import)
-    - [Data Cleanup](#data-cleanup)
-        - [Transient Problem](#transient-problem)
-        - [Permanent Problem](#permanent-problem)
-        - [Number Cleanup](#number-cleanup)
-    - [BigQuery](#bigquery)
+  - [Data Cleanup](#data-cleanup)
+    - [Transient Problem](#transient-problem)
+    - [Permanent Problem](#permanent-problem)
+    - [Number Cleanup](#number-cleanup)
+  - [BigQuery](#bigquery)
 - [Setup](#setup)
-    - [1. Create Directories](#1-create-directories)
-    - [2. Create MySQL Tables](#2-create-mysql-tables)
-    - [3. Create BigQuery Table](#3-create-bigquery-table)
-    - [4. Acquire the GCP Service Account Key File](#4-acquire-the-gcp-service-account-key-file)
-    - [5. Download the Reports](#5-download-the-reports)
-    - [6. Upload Reports to MySQL](#6-upload-reports-to-mysql)
-        - [6a. Insert Lifelong Report to BigQuery](#6a-insert-lifelong-report-to-bigquery)
+  - [1. Create Directories](#1-create-directories)
+  - [2. Create MySQL Tables](#2-create-mysql-tables)
+  - [3. Create BigQuery Table](#3-create-bigquery-table)
+  - [4. Acquire the GCP Service Account Key File](#4-acquire-the-gcp-service-account-key-file)
+  - [5. Download the Reports](#5-download-the-reports)
+  - [6. Upload Reports to MySQL](#6-upload-reports-to-mysql)
+    - [6a. Insert Lifelong Report to BigQuery](#6a-insert-lifelong-report-to-bigquery)
 
 ## Introduction
 
@@ -43,7 +47,7 @@ The scripts in this repo let you do the following things:
 
 1. Create a folder for each report to be downloaded to. This is achieved by the `create_agg_file_folders.sh` file.
 
-2. Download the reports CSV files (Daily, Weekly, 30 Days, 90 Days, and Lifelong). This is achieved by the `fb_all_reports_download_v060123.py` file. Check out the __[Data](#data)__ section to learn more about the reports.
+2. Download the reports CSV files (Daily, Weekly, 30 Days, 90 Days, and Lifelong). This is achieved by the `fb_all_reports_download_v060123.py` file. Check out the **[Data](#data)** section to learn more about the reports.
 
 3. Create tables in MySQL for each report. This is achieved by the `fb_agg_report_mysql_tables.sql` file.
 
@@ -51,11 +55,20 @@ The scripts in this repo let you do the following things:
 
 5. (For Lifelong only) Insert data into a table hosted in BigQuery in Google Cloud Platform
 
-You will use the corresponding R files for steps 4 and 5. Each report has its own R file. For example, you will use the `fb_lifelong_upload.R` file if you want to insert the Lifelong report to your BiqQuery table. 
+You will use the corresponding R files for steps 4 and 5. Each report has its own R file. For example, you will use the `fb_lifelong_upload.R` file if you want to insert the Lifelong report to your BiqQuery table.
 
-Instructions on how to set up the proper file directory structure, create the tables in MySQL, and enable uploads into BigQuery can be found in the __[Setup](#setup)__ section at the end of this document.
+Instructions on how to set up the proper file directory structure, create the tables in MySQL, and enable uploads into BigQuery can be found in the **[Setup](#setup)** section at the end of this document.
 
 ### Objective
+
+Each of our repos belongs to one or more of the following categories:
+
+- Data Collection
+- Data Processing
+- Data Classification
+- Compiled Final Data
+
+This repo is part of the Data Collection step.
 
 This repository is part of the CREATIVE project which has two main aims
 
@@ -79,16 +92,17 @@ We believe that this data could be used to address important issues including ba
 The reports page provides several files. They contain information on political and social-issue advertising on the platform and differ by the time span they cover.
 
 An individual record contains the following fields:
-* page name - text string with the current name of the page. Page names can be changed by owners. When an owner deletes their page, the report will contain a null string instead of the page name.
-* page id - a numeric id, uniquely identifying a page. This id does not change.
-* disclaimer, also known as "funding entity" or "paid for by". This is a text field that identifies the organization that paid for the specific ad. Providing this field is mandatory and in the past, when some advertisers did not provide it, their ads were taken down. The "paid for by" string is a requirement of Federal Election Commission (FEC) rules.
-* amount spent. The amount of money the specific page+funding_entity spent on the platform within the reporting time period. If the amount is less than 100 US dollars, the report will say "<= 100"
-* number of ads - total number of ads run on the platform by the specific page+funding_entity
 
-This kind of record is included in every type of the report. There are differences in how they are aggregated. 
+- page name - text string with the current name of the page. Page names can be changed by owners. When an owner deletes their page, the report will contain a null string instead of the page name.
+- page id - a numeric id, uniquely identifying a page. This id does not change.
+- disclaimer, also known as "funding entity" or "paid for by". This is a text field that identifies the organization that paid for the specific ad. Providing this field is mandatory and in the past, when some advertisers did not provide it, their ads were taken down. The "paid for by" string is a requirement of Federal Election Commission (FEC) rules.
+- amount spent. The amount of money the specific page+funding_entity spent on the platform within the reporting time period. If the amount is less than 100 US dollars, the report will say "<= 100"
+- number of ads - total number of ads run on the platform by the specific page+funding_entity
 
-* The lifelong "all dates" report contains the totals going back to May 2018 when Facebook launched its archive of political ads. This report does not separate the activity by geographic regions (i.e, the US states and territories).
-* The time span reports ("last day", "last 7 days", "last 30 days", and "last 90 days") describe the activity during the specified time periods. The zip files with these reports contain separate CSV files for each region.
+This kind of record is included in every type of the report. There are differences in how they are aggregated.
+
+- The lifelong "all dates" report contains the totals going back to May 2018 when Facebook launched its archive of political ads. This report does not separate the activity by geographic regions (i.e, the US states and territories).
+- The time span reports ("last day", "last 7 days", "last 30 days", and "last 90 days") describe the activity during the specified time periods. The zip files with these reports contain separate CSV files for each region.
 
 The lifelong report does not contain a breakdown by the US state. Other reports do contain the breakdown. The state-level values are reported in separate files, one file per U.S. state.
 
@@ -108,8 +122,8 @@ Here is how the downloading part of the page looks now:
 
 The `fb_all_reports_download_v060123.py` is a Python/Selenium script that runs on a Linux-based machine and uses Chrome running in the headless mode. There are two heavily technical points worth knowing:
 
-* Enabling the downloads. By default, as a security precaution, browsers running in headless mode will not download files. The downloads need to be enabled explicitly. Our script uses the Chrome API where the `command_executor` module sends a POST request to the browser to enable the downloads and change the destination directory. This is a highly technical and poorly documented feature that, probably, is dependent on the version of the Chrome. For instance, Firefox uses a different set of instructions that are passed through the browser profile file.
-* Triggering the download. The drop-down menu in the downloads section is actually a collection of `div` tags and is not a menu. In the past, the engineering team would change the spelling of the "download report" phrase and there was also a situation that there were actually two "download report" links in the page: one was visible, and the other one was not - it was part of the menu that would open up for users on a mobile device.
+- Enabling the downloads. By default, as a security precaution, browsers running in headless mode will not download files. The downloads need to be enabled explicitly. Our script uses the Chrome API where the `command_executor` module sends a POST request to the browser to enable the downloads and change the destination directory. This is a highly technical and poorly documented feature that, probably, is dependent on the version of the Chrome. For instance, Firefox uses a different set of instructions that are passed through the browser profile file.
+- Triggering the download. The drop-down menu in the downloads section is actually a collection of `div` tags and is not a menu. In the past, the engineering team would change the spelling of the "download report" phrase and there was also a situation that there were actually two "download report" links in the page: one was visible, and the other one was not - it was part of the menu that would open up for users on a mobile device.
 
 We are providing a version of the script that can run in a Google Colab notebook: `facebook_reports_downloader_firefox.ipynb`. Because the newer versions of Colab made installation of Chrome very difficult, the script uses headless Firefox that is installed when the notebook is initialized.
 
@@ -117,32 +131,35 @@ We are providing a version of the script that can run in a Google Colab notebook
 
 The downloader is launched every two hours using a crontab job. The script contains a for-loop that downloads the latest version of each kind of report into its own directory on our server. The names of the directories are:
 
-* `Lifelong`
-* `90Days`
-* `30Days`
-* `Weekly`, and 
-* `Daily`
-
+- `Lifelong`
+- `90Days`
+- `30Days`
+- `Weekly`, and
+- `Daily`
 
 ## Data Import
 
 A set of scripts scans the directories listed above and, if there are new files, imports them into the MySQL database. These scripts fall into two groups: with and without region data.
 
 Scripts that do not handle region data:
-* `fb_lifelong_upload.R`, and
-* `fb_daily_import2.R`
+
+- `fb_lifelong_upload.R`, and
+- `fb_daily_import2.R`
 
 Scripts that import a table with the `region` column:
-* `fb_weekly_regions_import.R`,
-* `fb_30days_regions_import.R`, and 
-* `fb_90days_regions_import.R`
+
+- `fb_weekly_regions_import.R`,
+- `fb_30days_regions_import.R`, and
+- `fb_90days_regions_import.R`
 
 ### Data Cleanup
 
 The scripts perform some data cleanup. Specifically, there was one transient and one persistent problem with the data furnished by Facebook.
 
-#### Transient Problem: 
+#### Transient Problem:
+
 The CSV files would contain a non-ASCII sequence of characters at the beginning of a line every 500 rows. This sequence is shown below:
+
 ```
 p = "\xef\xbb\xbf"
 ```
@@ -151,14 +168,13 @@ Because the page name is the first column in the file, presence of this sequence
 
 #### Permanent Problem:
 
-This problem is caused not by something in the Facebook system, but by the user input. As the reader probably knows, many text editors will automatically replace the regular straight quotation marks with the "curly" quotation marks. This is done for aesthetic reasons. 
+This problem is caused not by something in the Facebook system, but by the user input. As the reader probably knows, many text editors will automatically replace the regular straight quotation marks with the "curly" quotation marks. This is done for aesthetic reasons.
 
 Some of the entries in the report contain mismatched quotation marks which, most likely, arise in the following scenario: A user enclosed something into quotation marks, for instance, the nickname of a candidate, e.g. `Rob "Chip" Robbie`. The user was typing this in a text editor. The editor has converted one quotation symbol into the curly mark, but the other one stayed as the "straight" quotation marks. Facebook preserves user input and inserts it into the reports. CSV is a format that uses commas to separate fields in a record. If a text string inside a field contains a comma, then this field is enclosed into (is surrounded by) quotation marks. If the text already had quotation marks and they are unmatched (meaning there is an opening mark but it is not matched with a closing mark), then the data parsing function will incorrectly identify the boundary between fields.
 
 From our experience, the problem of mismatched quotation marks occurs more often among small advertisers. They tend to pick disclaimer strings with more textual flourishes (i.e., monikers in quotation marks). Here is an example of a record with this problem:
 
 <img width="786" alt="Screenshot 2023-06-04 at 10 48 04 PM" src="https://github.com/Wesleyan-Media-Project/fb_agg_reports_import/assets/17502191/3d9eb5ba-0f8b-4879-985b-10e0d33e4373">
-
 
 Notice how in the `funding_entity` column, the quotation marks around the nickname Chris are different: the opening quotation mark is straight, but the closing quotation mark is slanted and is actually a Unicode character.
 
@@ -172,8 +188,7 @@ Our way of handling this problem was to write our own import function. It is con
 
 #### Number Cleanup
 
-When the amount of spend on ads is below 100, Facebook does not report the number and instead inserts the string 
-
+When the amount of spend on ads is below 100, Facebook does not report the number and instead inserts the string
 
 <img width="58" alt="image of a string saying less than or equal to 100" src="https://github.com/Wesleyan-Media-Project/fb_agg_reports_import/assets/17502191/8ec0b73b-f998-4e9d-ba38-c17113d53c17">
 
@@ -193,7 +208,7 @@ Here is a screenshot showing the data up to June 1, 2023. The drops indicate the
 
 ## Setup
 
-In order to have the scripts run, you need to follow several steps: 
+In order to have the scripts run, you need to follow several steps:
 
 1. Create local file directories for each type of report
 2. Create tables in your MySQL/MariaDB instance that will store the data
@@ -201,11 +216,11 @@ In order to have the scripts run, you need to follow several steps:
 4. Download the service account key file from GCP to authenticate script access to BigQuery
 5. Download the Facebook Ad Reports for each time frame
 6. Clean and upload reports to MySQL
-    - 6a. Insert `lifelong` reports to BigQuery table (Lifelong only)
+   - 6a. Insert `lifelong` reports to BigQuery table (Lifelong only)
 
 ### 1. Create Directories
 
-Open the command prompt in your local machine. Navigate to your working directory if needed using the `cd path/to/your/directory` command (replace the `path/to/your/directory` part with your working directory. Once you get to your working directory, run the command line statements contained in the file `create_agg_file_folders.sh` file. You can either copy the statements in an editor and paste them at the command line, or execute the whole file by using the bash interpreter: 
+Open the command prompt in your local machine. Navigate to your working directory if needed using the `cd path/to/your/directory` command (replace the `path/to/your/directory` part with your working directory. Once you get to your working directory, run the command line statements contained in the file `create_agg_file_folders.sh` file. You can either copy the statements in an editor and paste them at the command line, or execute the whole file by using the bash interpreter:
 
 ```
 bash create_agg_file_folders.sh
@@ -258,7 +273,7 @@ CREATE TABLE
     amt_spent INTEGER,
     num_of_ads INTEGER,
     date STRING );
-    
+
 ```
 
 This will create an empty table that can be populated with the `lifelong` report from Facebook.
@@ -268,7 +283,7 @@ This will create an empty table that can be populated with the `lifelong` report
 Navigate to the IAM & Admin tab in your GCP project. Select "Service accounts". Go through the steps and create a service account. Enter `wmp-sandbox` in the "Service account name" field. The "Service account ID" field will be auto-populated. Click "CREATE AND CONTINUE". This will take you to Step 2, "Grant this service account access to project" tab. In the "Select a role" dropdown list, choose "Owner". This will grant the account all privileges, including operations with BigQuery.
 Click "DONE".
 
-After a few seconds, you will be taken back to the Service Accounts page. This time, however, there will be an entry for the service account that you just created. 
+After a few seconds, you will be taken back to the Service Accounts page. This time, however, there will be an entry for the service account that you just created.
 
 Under the "Actions" menu on the right side, click the vertical ellipses and click "Manage keys". You will be taken to the page that says "KEYS". Click the drop-down button "Add key". Select "Create new key" and select "JSON". A JSON file will be created and automatically downloaded on your computer. This file is the service account key file that you will need.
 
@@ -283,16 +298,16 @@ Now you are ready to launch the scripts and start collecting the data.
 The first part of collecting data is to download the reports for all timelines. To do that, you need to follow the steps below:
 
 - Install Chrome and ChromeDriver.
-First, you need to have Chrome installed in your system. Next, you will download the files for ChromeDrive from the [ChromeDriver website](https://chromedriver.chromium.org/downloads). Please be advised that ChromeDriver may not support the latest version of Chrome. You can find which version of Chrome the ChromeDriver supports in their website. Once downloaded, you need to unzip the files to the destination of your `fb_all_reports_download_v060123.py` location, which is the python code you will use to download reports.
+  First, you need to have Chrome installed in your system. Next, you will download the files for ChromeDrive from the [ChromeDriver website](https://chromedriver.chromium.org/downloads). Please be advised that ChromeDriver may not support the latest version of Chrome. You can find which version of Chrome the ChromeDriver supports in their website. Once downloaded, you need to unzip the files to the destination of your `fb_all_reports_download_v060123.py` location, which is the python code you will use to download reports.
 
 - Install Python.
-You will need to have Python installed in your system as well. You can download the latest version of Python [here](https://www.python.org/downloads/) and check out the guide on how to install it [here](https://docs.python.org/3/using/index.html).
+  You will need to have Python installed in your system as well. You can download the latest version of Python [here](https://www.python.org/downloads/) and check out the guide on how to install it [here](https://docs.python.org/3/using/index.html).
 
 - Revise Python code.
-Before running the code, you need to make a few revisions to the script. First you need to open the `fb_all_reports_download_v060123.py` file. In your Terminal or Command Prompt, you can open and revise this file by running `nano fb_all_reports_download_v060123.py`. Once in the script, you can modify file at the directed locations. Once done, save and exit the file.
+  Before running the code, you need to make a few revisions to the script. First you need to open the `fb_all_reports_download_v060123.py` file. In your Terminal or Command Prompt, you can open and revise this file by running `nano fb_all_reports_download_v060123.py`. Once in the script, you can modify file at the directed locations. Once done, save and exit the file.
 
 - Create Python Venv.
-It is recommended to use a python virtual environment and install all necessary packages used in the script to that environment. To create a virtual environment, you can run the following prompt:
+  It is recommended to use a python virtual environment and install all necessary packages used in the script to that environment. To create a virtual environment, you can run the following prompt:
 
 ```
 python3 -m venv myenv
@@ -304,7 +319,7 @@ You can activate this `myenv` by running either `source myenv/bin/activate` (For
 ` (For Windows). Once you are done running your Python code later, you can close this environment by running `deactivate`.
 
 - Install dependencies
-The next step is to install the necessary packages to run the Pyhton code. The packages you need to run `fb_all_reports_download_v060123.py` file are:
+  The next step is to install the necessary packages to run the Pyhton code. The packages you need to run `fb_all_reports_download_v060123.py` file are:
 
 Selenium, Numpy, Pandas, Datetime
 
@@ -315,7 +330,7 @@ pip install PACKAGE_NAME
 ```
 
 - Run the code.
-To run the code, first, open Python using your Terminal (For Linux/Mac) or Command Prompt (For Windows). Simply write `python` or `python3` and click enter. You will see the name Python, its version and some more information. Next, run the `fb_all_reports_download_v060123.py` file by running the following code (assuming your file is in the same location with your python virtual environment:
+  To run the code, first, open Python using your Terminal (For Linux/Mac) or Command Prompt (For Windows). Simply write `python` or `python3` and click enter. You will see the name Python, its version and some more information. Next, run the `fb_all_reports_download_v060123.py` file by running the following code (assuming your file is in the same location with your python virtual environment:
 
 ```
 python3 fb_all_reports_download_v060123.py
@@ -326,16 +341,16 @@ The code may take a while to run. Once done, you should be able to find the repo
 (We are providing a version of the script that can run in a Google Colab notebook: `facebook_reports_downloader_firefox.ipynb`. Because the newer versions of Colab made installation of Chrome very difficult, the script uses headless Firefox that is installed when the notebook is initialized.)
 
 ### 6. Upload Reports to MySQL
+
 After downloading the reports, the next step is to upload them to MySQL. Here are the steps to follow:
 
 - Install R
-First, you need to install R. You can download the latest version of R [here](https://cloud.r-project.org/) and check out the guide on how to install it by clicking the "Manuals" section.
+  First, you need to install R. You can download the latest version of R [here](https://cloud.r-project.org/) and check out the guide on how to install it by clicking the "Manuals" section.
 
 - Revise code.
-Next, you need to open and revise the R file you want to run. In your Terminal or Command Prompt, run `nano FILE_NAME.R` to open the R file you want to modify. Once opened, modify the file at the directed locations. Once done, save and exit the file.
-  
+  Next, you need to open and revise the R file you want to run. In your Terminal or Command Prompt, run `nano FILE_NAME.R` to open the R file you want to modify. Once opened, modify the file at the directed locations. Once done, save and exit the file.
 - Install packages.
-Once you installed R and revised the code, simply open your Terminal or Command Prompt and write `R` and click enter. You should see a prompt showing R's version. Before running the code, install the necessary packages by running the following code in R (replace the PACKAGE_NAME with the package you want to install):
+  Once you installed R and revised the code, simply open your Terminal or Command Prompt and write `R` and click enter. You should see a prompt showing R's version. Before running the code, install the necessary packages by running the following code in R (replace the PACKAGE_NAME with the package you want to install):
 
 ```
 install.packages("PACKAGE_NAME")
@@ -344,18 +359,16 @@ install.packages("PACKAGE_NAME")
 For all R scripts, you need to install three packages. These are `readr`, `dplyr`, and `RMySQL`. For the `fb_lifelong_upload.R` file, you need to install the `bigrquery`, in addition to the previous three. Once finished installing, quit R by typing `q()` and press enter.
 
 - Run the R code.
-Before running, make sure you have the `read_fb_file.R` in the same location with your R file. To run the codes, you need to run the first line of the R file which should look something like:
+  Before running, make sure you have the `read_fb_file.R` in the same location with your R file. To run the codes, you need to run the first line of the R file which should look something like:
 
 ```
 nohup R CMD BATCH --no-save --no-restore fb_30days_regions_import.R  /home/username/FB_reports/Logs/30days_import_$(date +%Y-%m-%d).txt &
 ```
 
-You need to modify the `/home/username/FB_reports/Logs` part with the directory you want to save the report file at. The `nohup` command (the name stands for "no hanging up") tells the operating system that the command/script should continue to run even when the user closes their terminal window. The `&`​ at the end instructs the shell to put the process into the background (without that, you won't be able to do anything with the CLI prompt since the shell will be waiting for your process to finish.). These are optional parts of the command. Once done, you gone open your report file to investigate whether your code ran successfully. 
+You need to modify the `/home/username/FB_reports/Logs` part with the directory you want to save the report file at. The `nohup` command (the name stands for "no hanging up") tells the operating system that the command/script should continue to run even when the user closes their terminal window. The `&`​ at the end instructs the shell to put the process into the background (without that, you won't be able to do anything with the CLI prompt since the shell will be waiting for your process to finish.). These are optional parts of the command. Once done, you gone open your report file to investigate whether your code ran successfully.
 
 #### 6a. Insert Lifelong report to BigQuery
+
 If you wish to upload the lifelong report to MySQL, you need to run the R command for the `fb_lifelong_upload.R` file. Different than other files, this will also instert the report to BigQuery as a table.
 
 Keep in mind that this code requires the GCP Service Account Key File in the same location with your R file. Make sure you have this JSON file. After running the code, you should be able to see that the BigQuery table for the lifelong report is populated with data from the report you downloaded.
-
-
-
