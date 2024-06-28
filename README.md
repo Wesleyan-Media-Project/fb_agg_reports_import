@@ -221,7 +221,7 @@ This will create a `FB_report` parent folder with a folder for each type of repo
 
 The next step is to create MySQL tables for each report which will store the data. The `fb_agg_report_mysql_tables.sql` file contains the SQL statements that will create the required tables. Follow the steps below to execute them:
 
-- Install MySQL
+- Install MySQL: If you do not have MySQL installed on your machine, you can install the [MySQL and the MySQL shell](https://dev.mysql.com/doc/mysql-shell/8.0/en/mysql-shell-install.html).
 - Open terminal (Command Prompt) in your machine.
 - Connect to MySQL: Start the MySQL command-line client and connect to your MySQL server using the following command:
 
@@ -237,7 +237,7 @@ Replace `username` with your MySQL username. You will be prompted to enter the p
 USE your_database;
 ```
 
-- Run the .sql File: To execute the .sql file, use the source command followed by the full path to the .sql file. Replace `/path/to/your_file.sql` with the actual path to your .sql file.
+- Run the .sql file `fb_agg_report_mysql_tables.sql`: To execute the .sql file, use the source command followed by the full path to the .sql file. Replace `/path/to/your_file.sql` with the actual path to your .sql file.
 
 ```sql
 source /path/to/your_file.sql
@@ -339,10 +339,10 @@ After downloading the reports, the next step is to upload them to MySQL. Here ar
   Next, you need to open and revise the R file you want to run. In your Terminal or Command Prompt, run `nano FILE_NAME.R` to open the R file you want to modify. Once opened, modify the file at the directed locations. Once done, save and exit the file.
 
 - Install packages.
-  Once you installed R and revised the code, simply open your Terminal or Command Prompt and write `R` and click enter. You should see a prompt showing R's version. Before running the code, install the necessary packages by running the following code in R (replace the PACKAGE_NAME with the package you want to install):
+  Once you installed R and revised the code, simply open your Terminal or Command Prompt and write `R` and click enter. You should see a prompt showing R's version. Before running the code, install the necessary packages by running the following code in R:
 
   ```r
-  install.packages("PACKAGE_NAME")
+  install.packages("bigrquery", "readr", "dplyr", "RMySQL")
   ```
 
   For all R scripts, you need to install three packages. These are `readr`, `dplyr`, and `RMySQL`. For the `fb_lifelong_upload.R` file, you need to install the `bigrquery`, in addition to the previous three. Once finished installing, quit R by typing `q()` and press enter.
